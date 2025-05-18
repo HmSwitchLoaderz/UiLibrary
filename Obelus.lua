@@ -847,7 +847,8 @@ Position = UDim2.new(0, 3, 0, 0),
 		TextColor3 = Color3.fromRGB(220, 220, 220),
 		TextSize = 13,
 		TextXAlignment = Enum.TextXAlignment.Left,
-		ClearTextOnFocus = true
+		ClearTextOnFocus = false,
+		Active = true
 	}})
 
 	-- // Functionality
