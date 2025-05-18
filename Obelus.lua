@@ -683,7 +683,8 @@ end)
 		BackgroundTransparency = 1,
 		BorderSizePixel = 0,
 		Parent = sectionContentHolder,
-		Size = UDim2.new(1, 0, 0, 20)
+		Size = UDim2.new(1, 0, 0, 20),
+		ClipsDescendants = true
 	}})
 
 	local dropdownButton = utility:Create({Type = "TextButton", Properties = {
@@ -729,6 +730,17 @@ end)
 		TextXAlignment = "Center"
 	}})
 
+	local arrow = utility:Create({Type = "TextLabel", Properties = {
+		BackgroundTransparency = 1,
+		Size = UDim2.new(0, 16, 1, 0),
+		Position = UDim2.new(1, -16, 0, 0),
+		Parent = dropdownFrame,
+		Text = "▼",
+		TextColor3 = Color3.fromRGB(180, 180, 180),
+		Font = "Code",
+		TextSize = 13
+	}})
+
 	-- // Dropdown Options Holder
 	local optionsHolder = utility:Create({Type = "Frame", Properties = {
 		BackgroundTransparency = 1,
@@ -756,7 +768,10 @@ end)
 		optionButton.MouseButton1Click:Connect(function()
 			dropdown.selected = option
 			dropdownTitle.Text = option
+			isOpen = false
 			optionsHolder.Visible = false
+			contentHolder:TweenSize(UDim2.new(1, 0, 0, 20), "Out", "Quad", 0.25, true)
+			arrow.Text = "▼"
 			dropdown.callback(option)
 		end)
 	end
@@ -765,7 +780,16 @@ end)
 	local isOpen = false
 	local connection = dropdownButton.MouseButton1Click:Connect(function()
 		isOpen = not isOpen
-		optionsHolder.Visible = isOpen
+		if isOpen then
+			optionsHolder.Visible = true
+			optionsHolder.Size = UDim2.new(1, -32, 0, #dropdown.options * 20)
+			contentHolder:TweenSize(UDim2.new(1, 0, 0, 20 + (#dropdown.options * 20)), "Out", "Quad", 0.25, true)
+			arrow.Text = "▲"
+		else
+			optionsHolder.Visible = false
+			contentHolder:TweenSize(UDim2.new(1, 0, 0, 20), "Out", "Quad", 0.25, true)
+			arrow.Text = "▼"
+		end
 	end)
 
 	-- // Cleanup
@@ -782,6 +806,7 @@ end)
 	return dropdown
 end
 
+
 				--
 				function section:Box(textboxInfo)
 	-- // Variables
@@ -790,53 +815,37 @@ end
 		callback = info.Callback or info.callback or function() end
 	}
 
-	-- // Utilisation
+	-- // Holder
 	local contentHolder = utility:Create({Type = "Frame", Properties = {
 		BackgroundTransparency = 1,
 		BorderSizePixel = 0,
 		Parent = sectionContentHolder,
-		Size = UDim2.new(1, 0, 0, 20)
+		Size = UDim2.new(1, 0, 0, 24)
 	}})
 
-	local textboxButton = utility:Create({Type = "TextBox", Properties = {
-		BackgroundTransparency = 1,
-		BorderSizePixel = 0,
-		Parent = contentHolder,
-		Position = UDim2.new(0, 0, 0, 0),
-		Size = UDim2.new(1, 0, 1, 0),
-		Text = ""
-	}})
-
+	-- // Main TextBox Frame (for border)
 	local textboxFrame = utility:Create({Type = "Frame", Properties = {
 		BackgroundColor3 = Color3.fromRGB(45, 45, 45),
-		BorderColor3 = Color3.fromRGB(1, 1, 1),
-		BorderMode = "Inset",
+		BorderColor3 = Color3.fromRGB(60, 60, 60),
 		BorderSizePixel = 1,
 		Parent = contentHolder,
-		Position = UDim2.new(0, 16, 0, 0),
-		Size = UDim2.new(1, -32, 1, 0)
+		Position = UDim2.new(0, 16, 0, 2),
+		Size = UDim2.new(1, -32, 1, -4),
 	}})
 
-	local textboxInline = utility:Create({Type = "Frame", Properties = {
-		BackgroundColor3 = Color3.fromRGB(25, 25, 25),
-		BorderSizePixel = 0,
-		Parent = textboxFrame,
-		Position = UDim2.new(0, 1, 0, 1),
-		Size = UDim2.new(1, -2, 1, -2)
-	}})
-
+	-- // TextBox Input
 	local textboxInput = utility:Create({Type = "TextBox", Properties = {
 		BackgroundTransparency = 1,
 		BorderSizePixel = 0,
-		Parent = contentHolder,
-		Size = UDim2.new(1, -32, 1, 0),
-		Position = UDim2.new(0, 16, 0, 0),
-		Font = "Code",
-		Text = info.Placeholder or info.Text or info.text or "Enter text...",
-		TextColor3 = Color3.fromRGB(180, 180, 180),
-		TextStrokeTransparency = 0.5,
+		Parent = textboxFrame,
+		Size = UDim2.new(1, -6, 1, 0),
+		Position = UDim2.new(0, 3, 0, 0),
+		Font = Enum.Font.Code,
+		Text = "",
+		PlaceholderText = info.Placeholder or info.Text or info.text or "Enter text...",
+		TextColor3 = Color3.fromRGB(220, 220, 220),
 		TextSize = 13,
-		TextXAlignment = "Center",
+		TextXAlignment = Enum.TextXAlignment.Left,
 		ClearTextOnFocus = true
 	}})
 
@@ -849,7 +858,7 @@ end
 
 	-- // Cleanup
 	function textbox:Remove()
-		contentHolder:Remove()
+		contentHolder:Destroy()
 		textbox = nil
 		utility:RemoveConnection({Connection = connection})
 		connection = nil
@@ -860,6 +869,7 @@ end
 	section:Update()
 	return textbox
 end
+
 
 				--
 				function section:Slider(sliderInfo)
