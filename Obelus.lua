@@ -831,7 +831,7 @@ end
 		Parent = contentHolder,
 		Position = UDim2.new(0, 16, 0, 2),
 		Size = UDim2.new(1, -32, 1, -4),
-		Active = false,
+		Active = true,
 	}})
 
 	-- // TextBox Input
