@@ -820,65 +820,68 @@ end
 
 				--
 function section:Box(textboxInfo)
-	-- // Variables
-	local info = textboxInfo or {}
-	local textbox = {
-		callback = info.Callback or info.callback or function() end
-	}
+    local info = textboxInfo or {}
+    local textbox = {
+        callback = info.Callback or info.callback or function() end
+    }
 
-	-- // Holder
-	local contentHolder = utility:Create({Type = "Frame", Properties = {
-		BackgroundTransparency = 1,
-		Parent = sectionContentHolder,
-		Size = UDim2.new(1, 0, 0, 24)
-	}})
+    local contentHolder = utility:Create({Type = "Frame", Properties = {
+        BackgroundTransparency = 1,
+        Parent = sectionContentHolder,
+        Size = UDim2.new(1, 0, 0, 24),
+        ClipsDescendants = false -- Important: Make sure no clipping
+    }})
 
-	local textboxFrame = utility:Create({Type = "Frame", Properties = {
-		BackgroundColor3 = Color3.fromRGB(45, 45, 45),
-		BorderColor3 = Color3.fromRGB(60, 60, 60),
-		BorderSizePixel = 1,
-		Parent = contentHolder,
-		Position = UDim2.new(0, 16, 0, 2),
-		Size = UDim2.new(1, -32, 1, -4),
-		Active = true,          -- Active true allows input detection on mobile
-		Selectable = true       -- Selectable true allows focus on mobile
-	}})
+    local textboxFrame = utility:Create({Type = "Frame", Properties = {
+        BackgroundColor3 = Color3.fromRGB(45, 45, 45),
+        BorderColor3 = Color3.fromRGB(60, 60, 60),
+        BorderSizePixel = 1,
+        Parent = contentHolder,
+        Position = UDim2.new(0, 16, 0, 2),
+        Size = UDim2.new(1, -32, 1, -4),
+        Active = true,
+        Selectable = true,
+        ClipsDescendants = false
+    }})
 
-	local textboxInput = utility:Create({Type = "TextBox", Properties = {
-		BackgroundTransparency = 1,
-		BorderSizePixel = 0,
-		Parent = textboxFrame,
-		Size = UDim2.new(1, -6, 1, 0),
-		Position = UDim2.new(0, 3, 0, 0),
-		Font = Enum.Font.Code,
-		TextColor3 = Color3.fromRGB(220, 220, 220),
-		TextSize = 13,
-		TextXAlignment = Enum.TextXAlignment.Left,
-		PlaceholderText = info.Placeholder or "Enter text...",
-		ClearTextOnFocus = info.ClearTextOnFocus ~= false, -- default true
-		Text = info.Text or ""
-	}})
+    local textboxInput = utility:Create({Type = "TextBox", Properties = {
+        BackgroundTransparency = 1,
+        BorderSizePixel = 0,
+        Parent = textboxFrame,
+        Size = UDim2.new(1, -6, 1, 0),
+        Position = UDim2.new(0, 3, 0, 0),
+        Font = Enum.Font.Code,
+        TextColor3 = Color3.fromRGB(220, 220, 220),
+        TextSize = 13,
+        TextXAlignment = Enum.TextXAlignment.Left,
+        PlaceholderText = info.Placeholder or "Enter text...",
+        ClearTextOnFocus = info.ClearTextOnFocus ~= false,
+        Text = info.Text or ""
+    }})
 
-	-- // Functionality
-	local connection = textboxInput.FocusLost:Connect(function(enterPressed)
-		if enterPressed then
-			textbox.callback(textboxInput.Text)
-		end
-	end)
+    -- Debug: Print when textbox gains focus
+    textboxInput.Focused:Connect(function()
+        print("Textbox focused")
+    end)
 
-	-- // Cleanup
-	function textbox:Remove()
-		contentHolder:Destroy()
-		textbox = nil
-		utility:RemoveConnection({Connection = connection})
-		connection = nil
-		section:Update()
-	end
+    -- Debug: Print when textbox loses focus
+    textboxInput.FocusLost:Connect(function(enterPressed)
+        print("Textbox focus lost, enter pressed:", enterPressed)
+        if enterPressed then
+            textbox.callback(textboxInput.Text)
+        end
+    end)
 
-	-- // Return
-	section:Update()
-	return textbox
+    function textbox:Remove()
+        contentHolder:Destroy()
+        textbox = nil
+        section:Update()
+    end
+
+    section:Update()
+    return textbox
 end
+
 
 
 				--
