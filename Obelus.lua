@@ -831,15 +831,16 @@ end
 		Parent = contentHolder,
 		Position = UDim2.new(0, 16, 0, 2),
 		Size = UDim2.new(1, -32, 1, -4),
+		Active = false,
 	}})
 
 	-- // TextBox Input
 	local textboxInput = utility:Create({Type = "TextBox", Properties = {
 		BackgroundTransparency = 1,
 		BorderSizePixel = 0,
-		Parent = textboxFrame,
-		Size = UDim2.new(1, -6, 1, 0),
-		Position = UDim2.new(0, 3, 0, 0),
+Parent = textboxFrame,
+Size = UDim2.new(1, -6, 1, 0),
+Position = UDim2.new(0, 3, 0, 0),
 		Font = Enum.Font.Code,
 		Text = "",
 		PlaceholderText = info.Placeholder or info.Text or info.text or "Enter text...",
