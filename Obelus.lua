@@ -669,13 +669,13 @@ end)
 					return button
 				end
 				-- 
-				 function section:Dropdown(dropdownInfo)
+function section:Dropdown(dropdownInfo)
 	-- // Variables
 	local info = dropdownInfo or {}
 	local dropdown = {
 		callback = info.Callback or info.callback or function() end,
 		options = info.Options or info.options or {},
-		selected = info.Default or info.default or info.options and info.options[1] or "Select"
+		selected = info.Default or info.default or (info.Options and info.Options[1]) or "Select"
 	}
 
 	-- // Utilisation
@@ -684,7 +684,7 @@ end)
 		BorderSizePixel = 0,
 		Parent = sectionContentHolder,
 		Size = UDim2.new(1, 0, 0, 20),
-		ClipsDescendants = true
+		ClipsDescendants = false -- Changed to false so dropdown can expand
 	}})
 
 	local dropdownButton = utility:Create({Type = "TextButton", Properties = {
@@ -704,7 +704,7 @@ end)
 		Parent = contentHolder,
 		Position = UDim2.new(0, 16, 0, 0),
 		Size = UDim2.new(1, -32, 1, 0),
-		ClipsDescendants = true
+		ClipsDescendants = false -- Changed to false
 	}})
 
 	local dropdownInline = utility:Create({Type = "Frame", Properties = {
@@ -721,13 +721,13 @@ end)
 		Parent = contentHolder,
 		Size = UDim2.new(1, -32, 1, 0),
 		Position = UDim2.new(0, 16, 0, 0),
-		Font = "Code",
+		Font = Enum.Font.Code,
 		RichText = true,
 		Text = dropdown.selected,
 		TextColor3 = Color3.fromRGB(180, 180, 180),
 		TextStrokeTransparency = 0.5,
 		TextSize = 13,
-		TextXAlignment = "Center"
+		TextXAlignment = Enum.TextXAlignment.Center
 	}})
 
 	local arrow = utility:Create({Type = "TextLabel", Properties = {
@@ -737,18 +737,19 @@ end)
 		Parent = dropdownFrame,
 		Text = "▼",
 		TextColor3 = Color3.fromRGB(180, 180, 180),
-		Font = "Code",
+		Font = Enum.Font.Code,
 		TextSize = 13
 	}})
 
-	-- // Dropdown Options Holder
+	-- // Dropdown Options Holder (parented outside clipped container)
 	local optionsHolder = utility:Create({Type = "Frame", Properties = {
 		BackgroundTransparency = 1,
 		BorderSizePixel = 0,
-		Parent = contentHolder,
-		Position = UDim2.new(0, 16, 0, 20),
-		Size = UDim2.new(1, -32, 0, #dropdown.options * 20),
-		Visible = false
+		Parent = sectionContentHolder.Parent, -- parent outside clipping container
+		Position = UDim2.new(0, 0, 0, 0), -- will be updated dynamically
+		Size = UDim2.new(0, 0, 0, 0),
+		Visible = false,
+		ZIndex = 10 -- make sure it appears above other UI
 	}})
 
 	-- // Option Buttons
@@ -761,7 +762,7 @@ end)
 			Size = UDim2.new(1, 0, 0, 20),
 			Text = option,
 			TextColor3 = Color3.fromRGB(180, 180, 180),
-			Font = "Code",
+			Font = Enum.Font.Code,
 			TextSize = 13
 		}})
 
@@ -776,13 +777,21 @@ end)
 		end)
 	end
 
+	-- // Helper function to update optionsHolder position and size
+	local function updateOptionsPosition()
+		local absPos = contentHolder.AbsolutePosition
+		local absSize = contentHolder.AbsoluteSize
+		optionsHolder.Position = UDim2.new(0, absPos.X + 16, 0, absPos.Y + 20)
+		optionsHolder.Size = UDim2.new(0, absSize.X - 32, 0, #dropdown.options * 20)
+	end
+
 	-- // Dropdown Toggle
 	local isOpen = false
 	local connection = dropdownButton.MouseButton1Click:Connect(function()
 		isOpen = not isOpen
 		if isOpen then
+			updateOptionsPosition()
 			optionsHolder.Visible = true
-			optionsHolder.Size = UDim2.new(1, -32, 0, #dropdown.options * 20)
 			contentHolder:TweenSize(UDim2.new(1, 0, 0, 20 + (#dropdown.options * 20)), "Out", "Quad", 0.25, true)
 			arrow.Text = "▲"
 		else
@@ -794,7 +803,8 @@ end)
 
 	-- // Cleanup
 	function dropdown:Remove()
-		contentHolder:Remove()
+		contentHolder:Destroy()
+		optionsHolder:Destroy()
 		utility:RemoveConnection({Connection = connection})
 		connection = nil
 		dropdown = nil
@@ -807,8 +817,9 @@ end)
 end
 
 
+
 				--
-				function section:Box(textboxInfo)
+function section:Box(textboxInfo)
 	-- // Variables
 	local info = textboxInfo or {}
 	local textbox = {
@@ -818,12 +829,10 @@ end
 	-- // Holder
 	local contentHolder = utility:Create({Type = "Frame", Properties = {
 		BackgroundTransparency = 1,
-		BorderSizePixel = 0,
 		Parent = sectionContentHolder,
 		Size = UDim2.new(1, 0, 0, 24)
 	}})
 
-	-- // Main TextBox Frame (for border)
 	local textboxFrame = utility:Create({Type = "Frame", Properties = {
 		BackgroundColor3 = Color3.fromRGB(45, 45, 45),
 		BorderColor3 = Color3.fromRGB(60, 60, 60),
@@ -831,24 +840,23 @@ end
 		Parent = contentHolder,
 		Position = UDim2.new(0, 16, 0, 2),
 		Size = UDim2.new(1, -32, 1, -4),
-		Active = true,
+		Active = true,          -- Active true allows input detection on mobile
+		Selectable = true       -- Selectable true allows focus on mobile
 	}})
 
-	-- // TextBox Input
 	local textboxInput = utility:Create({Type = "TextBox", Properties = {
 		BackgroundTransparency = 1,
 		BorderSizePixel = 0,
-Parent = textboxFrame,
-Size = UDim2.new(1, -6, 1, 0),
-Position = UDim2.new(0, 3, 0, 0),
+		Parent = textboxFrame,
+		Size = UDim2.new(1, -6, 1, 0),
+		Position = UDim2.new(0, 3, 0, 0),
 		Font = Enum.Font.Code,
-		Text = "",
-		PlaceholderText = info.Placeholder or info.Text or info.text or "Enter text...",
 		TextColor3 = Color3.fromRGB(220, 220, 220),
 		TextSize = 13,
 		TextXAlignment = Enum.TextXAlignment.Left,
-		ClearTextOnFocus = false,
-		Active = true
+		PlaceholderText = info.Placeholder or "Enter text...",
+		ClearTextOnFocus = info.ClearTextOnFocus ~= false, -- default true
+		Text = info.Text or ""
 	}})
 
 	-- // Functionality
