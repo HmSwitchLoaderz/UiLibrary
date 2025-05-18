@@ -670,150 +670,144 @@ end)
 				end
 				-- 
 function section:Dropdown(dropdownInfo)
-	-- // Variables
-	local info = dropdownInfo or {}
-	local dropdown = {
-		callback = info.Callback or info.callback or function() end,
-		options = info.Options or info.options or {},
-		selected = info.Default or info.default or (info.Options and info.Options[1]) or "Select"
-	}
+    local info = dropdownInfo or {}
+    local dropdown = {
+        callback = info.Callback or info.callback or function() end,
+        options = info.Options or info.options or {},
+        selected = info.Default or info.default or (info.Options and info.Options[1]) or "Select"
+    }
 
-	-- // Utilisation
-	local contentHolder = utility:Create({Type = "Frame", Properties = {
-		BackgroundTransparency = 1,
-		BorderSizePixel = 0,
-		Parent = sectionContentHolder,
-		Size = UDim2.new(1, 0, 0, 20),
-		ClipsDescendants = false -- Changed to false so dropdown can expand
-	}})
+    -- Holder frame
+    local contentHolder = utility:Create({Type = "Frame", Properties = {
+        BackgroundTransparency = 1,
+        BorderSizePixel = 0,
+        Parent = sectionContentHolder,
+        Size = UDim2.new(1, 0, 0, 20),
+        ClipsDescendants = false  -- important to allow dropdown to show outside
+    }})
 
-	local dropdownButton = utility:Create({Type = "TextButton", Properties = {
-		BackgroundTransparency = 1,
-		BorderSizePixel = 0,
-		Parent = contentHolder,
-		Position = UDim2.new(0, 0, 0, 0),
-		Size = UDim2.new(1, 0, 1, 0),
-		Text = ""
-	}})
+    -- Main dropdown button
+    local dropdownButton = utility:Create({Type = "TextButton", Properties = {
+        BackgroundTransparency = 1,
+        BorderSizePixel = 0,
+        Parent = contentHolder,
+        Position = UDim2.new(0, 0, 0, 0),
+        Size = UDim2.new(1, 0, 0, 20),
+        Text = ""
+    }})
 
-	local dropdownFrame = utility:Create({Type = "Frame", Properties = {
-		BackgroundColor3 = Color3.fromRGB(45, 45, 45),
-		BorderColor3 = Color3.fromRGB(1, 1, 1),
-		BorderMode = "Inset",
-		BorderSizePixel = 1,
-		Parent = contentHolder,
-		Position = UDim2.new(0, 16, 0, 0),
-		Size = UDim2.new(1, -32, 1, 0),
-		ClipsDescendants = false -- Changed to false
-	}})
+    -- Dropdown frame (background)
+    local dropdownFrame = utility:Create({Type = "Frame", Properties = {
+        BackgroundColor3 = Color3.fromRGB(45, 45, 45),
+        BorderColor3 = Color3.fromRGB(1, 1, 1),
+        BorderMode = "Inset",
+        BorderSizePixel = 1,
+        Parent = contentHolder,
+        Position = UDim2.new(0, 16, 0, 0),
+        Size = UDim2.new(1, -32, 1, 0),
+        ClipsDescendants = false
+    }})
 
-	local dropdownInline = utility:Create({Type = "Frame", Properties = {
-		BackgroundColor3 = Color3.fromRGB(25, 25, 25),
-		BorderSizePixel = 0,
-		Parent = dropdownFrame,
-		Position = UDim2.new(0, 1, 0, 1),
-		Size = UDim2.new(1, -2, 1, -2)
-	}})
+    local dropdownInline = utility:Create({Type = "Frame", Properties = {
+        BackgroundColor3 = Color3.fromRGB(25, 25, 25),
+        BorderSizePixel = 0,
+        Parent = dropdownFrame,
+        Position = UDim2.new(0, 1, 0, 1),
+        Size = UDim2.new(1, -2, 1, -2)
+    }})
 
-	local dropdownTitle = utility:Create({Type = "TextLabel", Properties = {
-		BackgroundTransparency = 1,
-		BorderSizePixel = 0,
-		Parent = contentHolder,
-		Size = UDim2.new(1, -32, 1, 0),
-		Position = UDim2.new(0, 16, 0, 0),
-		Font = Enum.Font.Code,
-		RichText = true,
-		Text = dropdown.selected,
-		TextColor3 = Color3.fromRGB(180, 180, 180),
-		TextStrokeTransparency = 0.5,
-		TextSize = 13,
-		TextXAlignment = Enum.TextXAlignment.Center
-	}})
+    local dropdownTitle = utility:Create({Type = "TextLabel", Properties = {
+        BackgroundTransparency = 1,
+        BorderSizePixel = 0,
+        Parent = contentHolder,
+        Size = UDim2.new(1, -32, 0, 20),
+        Position = UDim2.new(0, 16, 0, 0),
+        Font = Enum.Font.Code,
+        RichText = true,
+        Text = dropdown.selected,
+        TextColor3 = Color3.fromRGB(180, 180, 180),
+        TextStrokeTransparency = 0.5,
+        TextSize = 13,
+        TextXAlignment = Enum.TextXAlignment.Center,
+        TextYAlignment = Enum.TextYAlignment.Center
+    }})
 
-	local arrow = utility:Create({Type = "TextLabel", Properties = {
-		BackgroundTransparency = 1,
-		Size = UDim2.new(0, 16, 1, 0),
-		Position = UDim2.new(1, -16, 0, 0),
-		Parent = dropdownFrame,
-		Text = "▼",
-		TextColor3 = Color3.fromRGB(180, 180, 180),
-		Font = Enum.Font.Code,
-		TextSize = 13
-	}})
+    local arrow = utility:Create({Type = "TextLabel", Properties = {
+        BackgroundTransparency = 1,
+        Size = UDim2.new(0, 16, 0, 20),
+        Position = UDim2.new(1, -16, 0, 0),
+        Parent = dropdownFrame,
+        Text = "▼",
+        TextColor3 = Color3.fromRGB(180, 180, 180),
+        Font = Enum.Font.Code,
+        TextSize = 13
+    }})
 
-	-- // Dropdown Options Holder (parented outside clipped container)
-	local optionsHolder = utility:Create({Type = "Frame", Properties = {
-		BackgroundTransparency = 1,
-		BorderSizePixel = 0,
-		Parent = sectionContentHolder.Parent, -- parent outside clipping container
-		Position = UDim2.new(0, 0, 0, 0), -- will be updated dynamically
-		Size = UDim2.new(0, 0, 0, 0),
-		Visible = false,
-		ZIndex = 10 -- make sure it appears above other UI
-	}})
+    -- Options Holder (positioned BELOW dropdown)
+    local optionsHolder = utility:Create({Type = "Frame", Properties = {
+        BackgroundTransparency = 1,
+        BorderSizePixel = 0,
+        Parent = contentHolder,
+        Position = UDim2.new(0, 16, 0, 20),  -- directly below dropdown button
+        Size = UDim2.new(1, -32, 0, 0),     -- start collapsed
+        ClipsDescendants = false,
+        Visible = false
+    }})
 
-	-- // Option Buttons
-	for i, option in ipairs(dropdown.options) do
-		local optionButton = utility:Create({Type = "TextButton", Properties = {
-			BackgroundColor3 = Color3.fromRGB(35, 35, 35),
-			BorderSizePixel = 0,
-			Parent = optionsHolder,
-			Position = UDim2.new(0, 0, 0, (i - 1) * 20),
-			Size = UDim2.new(1, 0, 0, 20),
-			Text = option,
-			TextColor3 = Color3.fromRGB(180, 180, 180),
-			Font = Enum.Font.Code,
-			TextSize = 13
-		}})
+    -- Create option buttons
+    for i, option in ipairs(dropdown.options) do
+        local optionButton = utility:Create({Type = "TextButton", Properties = {
+            BackgroundColor3 = Color3.fromRGB(35, 35, 35),
+            BorderSizePixel = 0,
+            Parent = optionsHolder,
+            Position = UDim2.new(0, 0, 0, (i - 1) * 20),
+            Size = UDim2.new(1, 0, 0, 20),
+            Text = option,
+            TextColor3 = Color3.fromRGB(180, 180, 180),
+            Font = Enum.Font.Code,
+            TextSize = 13
+        }})
 
-		optionButton.MouseButton1Click:Connect(function()
-			dropdown.selected = option
-			dropdownTitle.Text = option
-			isOpen = false
-			optionsHolder.Visible = false
-			contentHolder:TweenSize(UDim2.new(1, 0, 0, 20), "Out", "Quad", 0.25, true)
-			arrow.Text = "▼"
-			dropdown.callback(option)
-		end)
-	end
+        optionButton.MouseButton1Click:Connect(function()
+            dropdown.selected = option
+            dropdownTitle.Text = option
+            isOpen = false
+            optionsHolder.Visible = false
+            contentHolder:TweenSize(UDim2.new(1, 0, 0, 20), "Out", "Quad", 0.25, true)
+            arrow.Text = "▼"
+            dropdown.callback(option)
+        end)
+    end
 
-	-- // Helper function to update optionsHolder position and size
-	local function updateOptionsPosition()
-		local absPos = contentHolder.AbsolutePosition
-		local absSize = contentHolder.AbsoluteSize
-		optionsHolder.Position = UDim2.new(0, absPos.X + 16, 0, absPos.Y + 20)
-		optionsHolder.Size = UDim2.new(0, absSize.X - 32, 0, #dropdown.options * 20)
-	end
+    -- Dropdown toggle logic
+    local isOpen = false
+    local connection = dropdownButton.MouseButton1Click:Connect(function()
+        isOpen = not isOpen
+        if isOpen then
+            optionsHolder.Visible = true
+            local totalHeight = #dropdown.options * 20
+            optionsHolder:TweenSize(UDim2.new(1, -32, 0, totalHeight), "Out", "Quad", 0.25, true)
+            contentHolder:TweenSize(UDim2.new(1, 0, 0, 20 + totalHeight), "Out", "Quad", 0.25, true)
+            arrow.Text = "▲"
+        else
+            optionsHolder:TweenSize(UDim2.new(1, -32, 0, 0), "Out", "Quad", 0.25, true)
+            contentHolder:TweenSize(UDim2.new(1, 0, 0, 20), "Out", "Quad", 0.25, true)
+            optionsHolder.Visible = false
+            arrow.Text = "▼"
+        end
+    end)
 
-	-- // Dropdown Toggle
-	local isOpen = false
-	local connection = dropdownButton.MouseButton1Click:Connect(function()
-		isOpen = not isOpen
-		if isOpen then
-			updateOptionsPosition()
-			optionsHolder.Visible = true
-			contentHolder:TweenSize(UDim2.new(1, 0, 0, 20 + (#dropdown.options * 20)), "Out", "Quad", 0.25, true)
-			arrow.Text = "▲"
-		else
-			optionsHolder.Visible = false
-			contentHolder:TweenSize(UDim2.new(1, 0, 0, 20), "Out", "Quad", 0.25, true)
-			arrow.Text = "▼"
-		end
-	end)
+    -- Cleanup function
+    function dropdown:Remove()
+        contentHolder:Destroy()
+        utility:RemoveConnection({Connection = connection})
+        connection = nil
+        dropdown = nil
+        section:Update()
+    end
 
-	-- // Cleanup
-	function dropdown:Remove()
-		contentHolder:Destroy()
-		optionsHolder:Destroy()
-		utility:RemoveConnection({Connection = connection})
-		connection = nil
-		dropdown = nil
-		section:Update()
-	end
-
-	-- // Return
-	section:Update()
-	return dropdown
+    section:Update()
+    return dropdown
 end
 
 
