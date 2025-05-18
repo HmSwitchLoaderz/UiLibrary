@@ -783,6 +783,85 @@ end)
 end
 
 				--
+				function section:Box(textboxInfo)
+	-- // Variables
+	local info = textboxInfo or {}
+	local textbox = {
+		callback = info.Callback or info.callback or function() end
+	}
+
+	-- // Utilisation
+	local contentHolder = utility:Create({Type = "Frame", Properties = {
+		BackgroundTransparency = 1,
+		BorderSizePixel = 0,
+		Parent = sectionContentHolder,
+		Size = UDim2.new(1, 0, 0, 20)
+	}})
+
+	local textboxButton = utility:Create({Type = "TextBox", Properties = {
+		BackgroundTransparency = 1,
+		BorderSizePixel = 0,
+		Parent = contentHolder,
+		Position = UDim2.new(0, 0, 0, 0),
+		Size = UDim2.new(1, 0, 1, 0),
+		Text = ""
+	}})
+
+	local textboxFrame = utility:Create({Type = "Frame", Properties = {
+		BackgroundColor3 = Color3.fromRGB(45, 45, 45),
+		BorderColor3 = Color3.fromRGB(1, 1, 1),
+		BorderMode = "Inset",
+		BorderSizePixel = 1,
+		Parent = contentHolder,
+		Position = UDim2.new(0, 16, 0, 0),
+		Size = UDim2.new(1, -32, 1, 0)
+	}})
+
+	local textboxInline = utility:Create({Type = "Frame", Properties = {
+		BackgroundColor3 = Color3.fromRGB(25, 25, 25),
+		BorderSizePixel = 0,
+		Parent = textboxFrame,
+		Position = UDim2.new(0, 1, 0, 1),
+		Size = UDim2.new(1, -2, 1, -2)
+	}})
+
+	local textboxInput = utility:Create({Type = "TextBox", Properties = {
+		BackgroundTransparency = 1,
+		BorderSizePixel = 0,
+		Parent = contentHolder,
+		Size = UDim2.new(1, -32, 1, 0),
+		Position = UDim2.new(0, 16, 0, 0),
+		Font = "Code",
+		Text = info.Placeholder or info.Text or info.text or "Enter text...",
+		TextColor3 = Color3.fromRGB(180, 180, 180),
+		TextStrokeTransparency = 0.5,
+		TextSize = 13,
+		TextXAlignment = "Center",
+		ClearTextOnFocus = true
+	}})
+
+	-- // Functionality
+	local connection = textboxInput.FocusLost:Connect(function(enterPressed)
+		if enterPressed then
+			textbox.callback(textboxInput.Text)
+		end
+	end)
+
+	-- // Cleanup
+	function textbox:Remove()
+		contentHolder:Remove()
+		textbox = nil
+		utility:RemoveConnection({Connection = connection})
+		connection = nil
+		section:Update()
+	end
+
+	-- // Return
+	section:Update()
+	return textbox
+end
+
+				--
 				function section:Slider(sliderInfo)
 					-- // Variables
 					local info = sliderInfo or {}
